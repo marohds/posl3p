@@ -210,6 +210,7 @@ if __name__ == "__main__":
     print("PyQt version:", PYQT_VERSION_STR)
     print("ROOT_PATH:", ROOT_PATH)
 
+    __log_folder_name = "logs/"
     __log_file_name = "{}-{}_log_file.txt".format("pos", dt.datetime.utcnow().isoformat().replace(":", "-"))
     __log_format = '%(asctime)s - %(name)-30s - %(levelname)s - %(message)s'
     __console_date_format = '%Y-%m-%d %H:%M:%S'
@@ -221,7 +222,7 @@ if __name__ == "__main__":
     console_formatter = logging.Formatter(__log_format, __console_date_format)
 
     file_formatter = logging.Formatter(__log_format, __file_date_format)
-    file_handler = logging.FileHandler(__log_file_name, mode='a', delay=True)
+    file_handler = logging.FileHandler(__log_folder_name + __log_file_name, mode='a', delay=True)
     # file_handler = TqdmLoggingHandler2(__log_file_name, mode='a', delay=True)
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(file_formatter)
