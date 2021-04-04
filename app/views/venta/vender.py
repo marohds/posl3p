@@ -153,6 +153,7 @@ class MdiChildVender(QWidget):
         self.pb_quitarUltimo.setDisabled((self.itemCount == 0))
         self.pb_quitarUltimo.setDisabled((self.itemCount == 0))
         self.pb_pago.setDisabled((self.itemCount == 0))
+        print('\a')
 
     def setTotalPago(self, monto):
         self.totalPago = Decimal("%0.2f" % (monto,))
