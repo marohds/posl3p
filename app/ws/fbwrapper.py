@@ -71,13 +71,15 @@ class FBWrapper():
             return False, "No se pudo obtener una respuesta del la impresora.<br />Verifique el estado del programa de impresión"
         msg = None
         rta = rtaobj["rta"][0]["rta"]
-        # rta.CerrarDocumento
-        # rta.CerrarDocumento.Secuencia
-        # rta.CerrarDocumento.NumeroComprobante
-        # rta.CerrarDocumento.CantidadDePaginas
-        # rta.CerrarDocumento.Estado
-        # rta.CerrarDocumento.Estado.Impresora[]
-        # rta.CerrarDocumento.Estado.Fiscal[]
+        # rta["CerrarJornadaFiscal"]
+        # rta["CerrarJornadaFiscal"]["Secuencia"]
+        # rta["CerrarJornadaFiscal"].Estado
+        # rta["CerrarJornadaFiscal"].Estado.Impresora[]
+        # rta["CerrarJornadaFiscal"].Estado.Fiscal[]
+        # rta["CerrarJornadaFiscal"]["Reporte"]
+        # rta["CerrarJornadaFiscal"]["Numero"]
+        # rta["CerrarJornadaFiscal"]["Fecha"]
+        # rta["CerrarJornadaFiscal"]["DF_TOTAL"]
         rta = json.loads(rta)
         pprint(rta)
         return True, ""
@@ -117,7 +119,6 @@ class FBWrapper():
         result,msg,rta = FBWrapper.send(jsonTicket)
         if (result):
             rta = json.loads(rta)
-            # rta = json.loads(rta, object_hook=lambda d: SimpleNamespace(**d))
             result,msg = FBWrapper.validarRespuestaTicket(rta)
 
         return result,msg,rta

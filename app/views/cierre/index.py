@@ -53,7 +53,7 @@ class CierreIndexView(QWidget):
             QMessageBox.information(self,"Cierre Z","Se envió a imprimir el Cierre Z<br />Verifique la impresora.<br />" + msg)
         else:
             print(msg)
-            QMessageBox.critical(self,"Imprimir Ticket",msg)
+            QMessageBox.critical(self,"Cierre Z",msg)
         self.pb_cierrez.setDisabled(False)
 
     def connectEvents(self):
