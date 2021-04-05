@@ -35,7 +35,7 @@ class FBWrapper():
     @staticmethod
     def validarRespuesta(rtaobj):
         # {"rta": [{"action": "printTicket", "rta": null}]}
-        pprint(rtadict)
+        pprint(rtaobj)
         if (rtaobj.rta[0]["rta"] == None):
             return False, "No se pudo obtener una respuesta del la impresora.<br />Verifique el estado del programa de impresión"
         msg = None
