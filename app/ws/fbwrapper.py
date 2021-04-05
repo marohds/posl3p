@@ -38,12 +38,14 @@ class FBWrapper():
         if (rtadict["rta"][0]["rta"] == None):
             return False, "No se pudo obtener una respuesta del la impresora.<br />Verifique el estado del programa de impresión"
         msg = None
-        estado_impresora = (len(rtadict["Estado"]["Impresora"]) == 0)
-        estado_fiscal = (len(rtadict["Estado"]["Fiscal"]) == 0)
+        rta = rtadict["rta"][0]["rta"]
+        pprint(rta)
+        estado_impresora = (len(rta["Estado"]["Impresora"]) == 0)
+        estado_fiscal = (len(rta["Estado"]["Fiscal"]) == 0)
         if (not estado_impresora):
-            msg = str(rtadict["Estado"]["Impresora"][0])
+            msg = str(rta["Estado"]["Impresora"][0])
         if (not estado_impresora):
-            msg = str(rtadict["Estado"]["Fiscal"][0])
+            msg = str(rta["Estado"]["Fiscal"][0])
         result = (estado_impresora and estado_fiscal)
         return result,msg
 
