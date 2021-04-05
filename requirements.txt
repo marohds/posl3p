@@ -4,5 +4,6 @@ SQLAlchemy
 pandas
 websocket-client
 Unidecode
+playsound
 # beepy
-winsound
+# winsound
