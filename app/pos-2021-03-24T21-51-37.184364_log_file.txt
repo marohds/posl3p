@@ -1,9 +1,0 @@
-2021-03-24 18-51-39 - sqlalchemy.engine.base.Engine  - INFO - SELECT CAST('test plain returns' AS VARCHAR(60)) AS anon_1
-2021-03-24 18-51-39 - sqlalchemy.engine.base.Engine  - INFO - ()
-2021-03-24 18-51-39 - sqlalchemy.engine.base.Engine  - INFO - SELECT CAST('test unicode returns' AS VARCHAR(60)) AS anon_1
-2021-03-24 18-51-39 - sqlalchemy.engine.base.Engine  - INFO - ()
-2021-03-24 18-51-39 - sqlalchemy.engine.base.Engine  - INFO - BEGIN (implicit)
-2021-03-24 18-51-39 - sqlalchemy.engine.base.Engine  - INFO - SELECT count(sell.id) AS ventas 
-FROM sell 
-WHERE sell.estado = ? AND sell.cierre_id IS NULL AND sell.created_at < ?
-2021-03-24 18-51-39 - sqlalchemy.engine.base.Engine  - INFO - (1, '2021-03-24 00:00:00.000000')

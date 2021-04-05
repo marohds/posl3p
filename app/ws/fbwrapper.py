@@ -47,6 +47,7 @@ class FBWrapper():
         # rta.CerrarDocumento.Estado
         # rta.CerrarDocumento.Estado.Impresora[]
         # rta.CerrarDocumento.Estado.Fiscal[]
+        rta = json.loads(rta)
         pprint(rta)
         pprint(rta["CerrarDocumento"])
         pprint(rta["CerrarDocumento"]["Estado"])
