@@ -33,7 +33,7 @@ class FBWrapper():
             logging.error(str(e))
 
     @staticmethod
-    def validarRespuesta(rtaobj):
+    def validarRespuestaTicket(rtaobj):
         # {"rta": [{"action": "printTicket", "rta": null}]}
         pprint(rtaobj)
         if (rtaobj["rta"][0]["rta"] == None):
@@ -64,13 +64,32 @@ class FBWrapper():
         return result, msg
 
     @staticmethod
+    def validarRespuestaCierreZ(rtaobj):
+        # {"rta": [{"action": "printTicket", "rta": null}]}
+        pprint(rtaobj)
+        if (rtaobj["rta"][0]["rta"] == None):
+            return False, "No se pudo obtener una respuesta del la impresora.<br />Verifique el estado del programa de impresión"
+        msg = None
+        rta = rtaobj["rta"][0]["rta"]
+        # rta.CerrarDocumento
+        # rta.CerrarDocumento.Secuencia
+        # rta.CerrarDocumento.NumeroComprobante
+        # rta.CerrarDocumento.CantidadDePaginas
+        # rta.CerrarDocumento.Estado
+        # rta.CerrarDocumento.Estado.Impresora[]
+        # rta.CerrarDocumento.Estado.Fiscal[]
+        rta = json.loads(rta)
+        pprint(rta)
+        return True, ""
+
+    @staticmethod
     def cierreZ():
         cierreZJson = {"dailyClose":"Z","printerName":"IMPRESORA_FISCAL"}
         cierreZJson = json.dumps(cierreZJson)
         result,msg,rta = FBWrapper.send(cierreZJson)
         if (result):
             rta = json.loads(rta)
-            result,msg = FBWrapper.validarRespuesta(rta)
+            result,msg = FBWrapper.validarRespuestaCierreZ(rta)
         return result,msg,rta
 
 
@@ -99,7 +118,7 @@ class FBWrapper():
         if (result):
             rta = json.loads(rta)
             # rta = json.loads(rta, object_hook=lambda d: SimpleNamespace(**d))
-            result,msg = FBWrapper.validarRespuesta(rta)
+            result,msg = FBWrapper.validarRespuestaTicket(rta)
 
         return result,msg,rta
         # {"printTicket":{"encabezado":{"tipo_cbte":"T"},"items":[{"alic_iva":21,"importe":0.01,"ds":"PEPSI","qty":1},{"alic_iva":21,"importe":0.12,"ds":"COCA","qty":2}]},"printerName":"IMPRESORA_FISCAL"}
