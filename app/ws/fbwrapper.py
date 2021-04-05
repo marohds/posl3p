@@ -7,7 +7,7 @@ import json
 import unidecode
 import logging
 from pprint import pprint
-from types import SimpleNamespace
+# from types import SimpleNamespace
 
 class FBWrapper():
 
@@ -36,10 +36,10 @@ class FBWrapper():
     def validarRespuesta(rtaobj):
         # {"rta": [{"action": "printTicket", "rta": null}]}
         pprint(rtaobj)
-        if (rtaobj.rta[0]["rta"] == None):
+        if (rtaobj["rta"][0]["rta"] == None):
             return False, "No se pudo obtener una respuesta del la impresora.<br />Verifique el estado del programa de impresión"
         msg = None
-        rta = rtaobj.rta[0]["rta"]
+        rta = rtaobj["rta"][0]["rta"]
         # rta.CerrarDocumento
         # rta.CerrarDocumento.Secuencia
         # rta.CerrarDocumento.NumeroComprobante
@@ -48,17 +48,17 @@ class FBWrapper():
         # rta.CerrarDocumento.Estado.Impresora[]
         # rta.CerrarDocumento.Estado.Fiscal[]
         pprint(rta)
-        pprint(rta.CerrarDocumento)
-        pprint(rta.CerrarDocumento.Estado)
-        pprint(rta.CerrarDocumento.Estado.Impresora)
-        pprint(rta.CerrarDocumento.Estado.Fiscal)
-        estado_impresora = (len(rta.CerrarDocumento.Estado.Impresora) == 0)
+        pprint(rta["CerrarDocumento"])
+        pprint(rta["CerrarDocumento"]["Estado"])
+        pprint(rta["CerrarDocumento"]["Estado"]["Impresora"])
+        pprint(rta["CerrarDocumento"]["Estado"]["Fiscal"])
+        estado_impresora = (len(rta["CerrarDocumento"]["Estado"]["Impresora"]) == 0)
         pprint(estado_impresora)
-        estado_fiscal = (rta.CerrarDocumento.Estado.Fiscal[0] == "MemoriaFiscalInicializada")
+        estado_fiscal = (str(rta["CerrarDocumento"]["Estado"]["Fiscal"][0]) == "MemoriaFiscalInicializada")
         if (not estado_impresora):
-            msg = str(rtajson["Estado"].Impresora[0])
+            msg = str(rta["CerrarDocumento"]["Estado"]["Impresora"][0])
         if (not estado_impresora):
-            msg = str(rtajson["Estado"].Fiscal[0])
+            msg = str(rta["CerrarDocumento"]["Estado"]["Fiscal"][0])
         result = (estado_impresora and estado_fiscal)
         return result, msg
 
@@ -96,8 +96,8 @@ class FBWrapper():
         jsonTicket = json.dumps(printTicket)
         result,msg,rta = FBWrapper.send(jsonTicket)
         if (result):
-            # rta = json.loads(rta)
-            rta = json.loads(rta, object_hook=lambda d: SimpleNamespace(**d))
+            rta = json.loads(rta)
+            # rta = json.loads(rta, object_hook=lambda d: SimpleNamespace(**d))
             result,msg = FBWrapper.validarRespuesta(rta)
 
         return result,msg,rta
