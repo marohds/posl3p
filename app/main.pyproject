@@ -3,6 +3,7 @@
         "main.py",
         "mdi.qrc",
         "utils.py",
+        "../requirements.txt",
         "db/data/products.csv",
         "db/models/alchemicaltablemodel.py",
         "db/models/base.py",

@@ -11,7 +11,7 @@ from sqlalchemy import desc, func
 from decimal import Decimal
 from views.product.edit import ProductoEditView
 from pprint import pprint
-from utils import get_project_root
+from utils import get_project_root, play_pop, play_error
 
 
 ROOT_PATH = str(get_project_root())
@@ -39,6 +39,7 @@ class MdiChildVender(QWidget):
         countQuery = self.dbm.session.query(func.count(Venta.id).label('ventas')).filter(Venta.estado == 1,Venta.cierre_id == None,Venta.created_at < f_hoy).one()
         if (countQuery[0]>0):
             logging.info("Existen tickets con cierre Z pendiente.")
+            play_error()
             QMessageBox.warning(self, "Cierre Z", "Existen tickets con cierre Z pendiente.")
 
     def __del__(self):
@@ -153,7 +154,6 @@ class MdiChildVender(QWidget):
         self.pb_quitarUltimo.setDisabled((self.itemCount == 0))
         self.pb_quitarUltimo.setDisabled((self.itemCount == 0))
         self.pb_pago.setDisabled((self.itemCount == 0))
-        print('\a')
 
     def setTotalPago(self, monto):
         self.totalPago = Decimal("%0.2f" % (monto,))
@@ -185,10 +185,12 @@ class MdiChildVender(QWidget):
             self.agregarProductoAVenta(result, None, True)
         else:
             logging.info("Producto No Encontrado CodBarra = " + txtBuscar)
+            play_error()
             QMessageBox.warning(self, "Venta", "Producto No Encontrado")
             self.openNewProduct()
         self.txt_codbar.setText("")
         self.txt_codbar.setFocus()
+
 
     def openNewProduct(self):
         modal = ProductoEditView(self.txt_codbar.text())
@@ -233,6 +235,7 @@ class MdiChildVender(QWidget):
                     self.actualizarPantalla()
                 else:
                     logging.info("Producto No Encontrado ID = " + codProd)
+                    play_error()
                     QMessageBox.warning(self,"Venta","Producto No Encontrado")
 
     def agregarProductoAVenta(self, producto, precio, acumular):
@@ -259,6 +262,7 @@ class MdiChildVender(QWidget):
             # self.session.commit()
         self.setTotalBultos(self.totalBultos + 1)
         self.setTotalVenta(self.venta.total_venta + Decimal("%0.2f" % (totalItem,)), self.venta.total_dto + Decimal("%0.2f" % (totalDto,)))
+        play_pop()
         self.actualizarPantalla()
 
     def obtenerItemVenta(self, prod_id, precio_vta):

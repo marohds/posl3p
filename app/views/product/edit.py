@@ -20,6 +20,7 @@ class ProductoEditView(QDialog):
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.isUntitled = True
         self.txt_codbarra.setText(codbar)
+        self.txt_nombre.setFocus()
         # self.setMinimumSize(400, 200)
         self.connectEvents()
         self.dbm = DBManager()
