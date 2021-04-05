@@ -41,14 +41,15 @@ class FBWrapper():
         rtajson = json.loads(rtadict["rta"][0]["rta"])
         pprint(rtajson)
         # estado_impresora = (len(rtajson["Estado"]["Impresora"]) == 0)
-        estado_impresora = (len(rtajson.Estado.Impresora) == 0)
+        pprint(rtajson["Estado"])
+        estado_impresora = (len(rtajson["Estado"].Impresora) == 0)
         pprint(estado_impresora)
         # estado_fiscal = (len(rtajson["Estado"]["Fiscal"]) == 0)
-        estado_fiscal = (len(rtajson.Estado.Fiscal) == 0)
+        estado_fiscal = (len(rtajson["Estado"].Fiscal) == 0)
         if (not estado_impresora):
-            msg = str(rtajson.Estado.Impresora[0])
+            msg = str(rtajson["Estado"].Impresora[0])
         if (not estado_impresora):
-            msg = str(rtajson.Estado.Fiscal[0])
+            msg = str(rtajson["Estado"].Fiscal[0])
         result = (estado_impresora and estado_fiscal)
         return result,msg
 
