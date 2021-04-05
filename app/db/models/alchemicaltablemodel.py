@@ -9,6 +9,7 @@ from db.DBManager import DBManager
 from db.models.objects import Product
 from db.models.qvariantalchemy import String, Integer, Boolean, DateTime
 from datetime import datetime
+import pytz
 from dateutil.parser import parse
 
 from pprint import pprint
@@ -136,6 +137,8 @@ class AlchemicalTableModel(QAbstractTableModel):
         value = rgetattr(row, name)
 
         if isinstance(value, datetime):
+            timezone = pytz.timezone("America/Argentina/Buenos_Aires")
+            value = pytz.utc.localize(value).astimezone(pytz.timezone("America/Argentina/Buenos_Aires"))
             value = str(value.strftime("%d/%m/%Y %H:%M:%S"))
         else:
             value = str(value)

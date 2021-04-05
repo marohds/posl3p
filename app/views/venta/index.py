@@ -1,4 +1,5 @@
 import datetime as dt
+import pytz
 import logging
 from PyQt5.QtCore import (QFile, QFileInfo, QPoint, QSettings, QSignalMapper, QSize, QTextStream, Qt, pyqtSlot, QModelIndex)
 from PyQt5.QtWidgets import (QAction, QApplication, QFileDialog, QMainWindow, QMdiArea, QMessageBox, QTextEdit, QWidget, QTableView)
@@ -30,6 +31,8 @@ class VentaIndexView(QWidget):
                                 func.count(Venta.id).label('ventas'),
                                 func.sum(Venta.total_venta).label('total'),
                             )
+        #dt.datetime.utcnow().date()
+
         self.dt_desde.setDate(dt.date.today())
         self.dt_hasta.setDate(dt.date.today())
         self.selectedVenta = None
@@ -38,6 +41,9 @@ class VentaIndexView(QWidget):
     def cargarVentas(self):
         f_desde = dt.datetime(self.dt_desde.date().year(), self.dt_desde.date().month(), self.dt_desde.date().day(),0,0,0)
         f_hasta = dt.datetime(self.dt_hasta.date().year(), self.dt_hasta.date().month(), self.dt_hasta.date().day(),23,59,59)
+        timezone = pytz.timezone("America/Argentina/Buenos_Aires")
+        f_desde = timezone.localize(f_desde).astimezone(pytz.utc)
+        f_hasta = timezone.localize(f_hasta).astimezone(pytz.utc)
         if (f_desde <= f_hasta):
             tempQuery = self.ventasQuery.filter(Venta.created_at >= f_desde).filter(Venta.created_at <= f_hasta)
             countQuery = self.totalesQuery.filter(Venta.created_at >= f_desde).filter(Venta.created_at <= f_hasta).one()
