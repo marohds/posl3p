@@ -97,7 +97,7 @@ class FBWrapper():
         result,msg,rta = FBWrapper.send(jsonTicket)
         if (result):
             # rta = json.loads(rta)
-            rta = json.loads(data, object_hook=lambda d: SimpleNamespace(**d))
+            rta = json.loads(rta, object_hook=lambda d: SimpleNamespace(**d))
             result,msg = FBWrapper.validarRespuesta(rta)
 
         return result,msg,rta
