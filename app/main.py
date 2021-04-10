@@ -11,7 +11,6 @@ from sip import SIP_VERSION_STR
 from PyQt5.QtCore import (QT_VERSION_STR, QFile, QFileInfo, QPoint, QSettings, QSignalMapper, QSize, QTextStream, Qt)
 from PyQt5.QtGui import QIcon, QKeySequence
 from PyQt5.QtWidgets import (QAction, QApplication, QFileDialog, QMainWindow, QMdiArea, QMessageBox, QTextEdit, QWidget)
-from views.product.new import MdiChildNewProduct
 from views.venta.vender import MdiChildVender
 from views.venta.index import VentaIndexView
 from views.cierre.index import CierreIndexView

@@ -2,7 +2,8 @@ import datetime as dt
 import logging
 from PyQt5.QtCore import (QFile, QFileInfo, QPoint, QSettings, QSignalMapper, QSize, QTextStream, Qt, QAbstractTableModel)
 from PyQt5.QtWidgets import (QAction, QApplication, QFileDialog, QMainWindow, QMdiArea, QMessageBox, QLineEdit, QTextEdit, QWidget, QInputDialog)
-from PyQt5 import QtCore, QtGui, uic
+from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt5.QtGui import QFont
 from db.models.objects import Product, Venta, VentaItem
 from db.DBManager import DBManager
 from db.models.alchemicaltablemodel import AlchemicalTableModel
@@ -12,7 +13,6 @@ from decimal import Decimal
 from views.product.edit import ProductoEditView
 from pprint import pprint
 from utils import get_project_root, play_pop, play_error
-
 
 ROOT_PATH = str(get_project_root())
 
@@ -33,30 +33,37 @@ class MdiChildVender(QWidget):
         self.selectedPrecioVenta = None
         self.validarCierreZ()
         # self.setMinimumSize(400, 200)
+        fnt = QFont("Arial", 18)
+        self.tb_venta.setFont(fnt)
+
+    def __del__(self):
+        try:
+            if self.session.dirty:
+                self.session.rollback()
+            self.session.close()
+        except:
+            pass
 
     def validarCierreZ(self):
         f_hoy = dt.datetime(dt.date.today().year, dt.date.today().month, dt.date.today().day,0,0,0)
-        countQuery = self.dbm.session.query(func.count(Venta.id).label('ventas')).filter(Venta.estado == 1,Venta.cierre_id == None,Venta.created_at < f_hoy).one()
-        if (countQuery[0]>0):
+        tempSession = self.dbm.getNewSession()
+        countQuery = tempSession.query(func.count(Venta.id).label('ventas')).filter(Venta.estado == 1,Venta.cierre_id == None,Venta.created_at < f_hoy).one()
+        tempSession.close()
+        if (countQuery[0] > 0):
             logging.info("Existen tickets con cierre Z pendiente.")
             play_error()
             QMessageBox.warning(self, "Cierre Z", "Existen tickets con cierre Z pendiente.")
-
-    def __del__(self):
-        self.session.rollback()
-        self.session.close()
-        print ("Object destroyed");
 
     def keyPressEvent(self, event):
         # F1 -> Vender
         # F2 -> Maestro de Productos
         # En la ventana Vender
-        #   V -> Agregar monto Varios
+        #   X -> Agregar monto Varios
         #   C -> Agregar monto Carnicería
         #   F -> Agregar monto Fiambres
-        #   Q -> Agregar monto Quitar Unidad
+        #   - -> Agregar monto Quitar Unidad
         #   P -> Registro Pago
-        #   T -> Imprimir Ticket
+        #   + -> Imprimir Ticket
         #   K -> Finalizar Venta
         #   A -> Anular Venta
         #   N -> NUEVA Venta
@@ -73,7 +80,7 @@ class MdiChildVender(QWidget):
             self.txt_codbar.setText("")
             self.agregarCarniceria()
             return
-        if key == QtCore.Qt.Key_V:
+        if key == QtCore.Qt.Key_X:
             self.txt_codbar.setText("")
             self.agregarVarios()
             return
@@ -81,7 +88,7 @@ class MdiChildVender(QWidget):
             self.txt_codbar.setText("")
             self.agregarFiambre()
             return
-        if key == QtCore.Qt.Key_Q:
+        if key == QtCore.Qt.Key_Minus:
             self.txt_codbar.setText("")
             self.quitarUnidadItem()
             return
@@ -89,14 +96,14 @@ class MdiChildVender(QWidget):
             self.txt_codbar.setText("")
             self.registrarPago()
             return
-        if key == QtCore.Qt.Key_T:
+        if key == QtCore.Qt.Key_Plus:
+            self.imprimirTicket()
             return
         if key == QtCore.Qt.Key_K:
             self.finalizarVenta(False)
             return
         if key == QtCore.Qt.Key_A:
-            return
-        if key == QtCore.Qt.Key_N:
+            self.anularVenta()
             return
         super(MdiChildVender, self).keyPressEvent(event)
 
@@ -171,29 +178,30 @@ class MdiChildVender(QWidget):
         self.lblCantBultos.setText('<html><head/><body><p><span style=" font-size:48pt;">' + str(self.totalBultos) + '</span></p></body></html>')
 
     def registrarPago(self):
-        valor, okPressed = QInputDialog.getDouble(self, "Ingrese un valor", "Value:", 0, 0, 999999999, 2)
-        if okPressed:
-            if (valor > 0) :
-                self.setTotalPago(valor)
+        if self.model is not None:
+            valor, okPressed = QInputDialog.getDouble(self, "Ingrese un valor", "Value:", 0, 0, 999999999, 2)
+            if okPressed:
+                if (valor > 0):
+                    self.setTotalPago(valor)
 
     def agregarCodigoBarras(self):
-        txtBuscar = self.txt_codbar.text()
-        tempSession = self.dbm.getNewSession()
-        result = tempSession.query(Product).filter_by(codbarra=txtBuscar).first()
-        tempSession.close()
-        if (result is not None):
-            self.agregarProductoAVenta(result, None, True)
-        else:
-            logging.info("Producto No Encontrado CodBarra = " + txtBuscar)
-            play_error()
-            QMessageBox.warning(self, "Venta", "Producto No Encontrado")
-            self.openNewProduct()
+        if self.txt_codbar.text():
+            txtBuscar = self.txt_codbar.text()
+            tempSession = self.dbm.getNewSession()
+            result = tempSession.query(Product).filter_by(codbarra=txtBuscar).first()
+            tempSession.close()
+            if (result is not None):
+                self.agregarProductoAVenta(result, None, True)
+            else:
+                logging.info("Producto No Encontrado CodBarra = " + txtBuscar)
+                play_error()
+                QMessageBox.warning(self, "Venta", "Producto No Encontrado")
+                self.openNewProduct()
         self.txt_codbar.setText("")
         self.txt_codbar.setFocus()
 
-
     def openNewProduct(self):
-        modal = ProductoEditView(self.txt_codbar.text())
+        modal = ProductoEditView(self.txt_codbar.text(), self.session)
         modal.setObjectName("productedit")
         modal.resize(687, 438)
         modal.exec_()
@@ -211,7 +219,7 @@ class MdiChildVender(QWidget):
         if (self.selectedProductId is None):
             pass
         else:
-            item = self.obtenerItemVenta(self.selectedProductId,self.selectedPrecioVenta)
+            item = self.obtenerItemVenta(self.selectedProductId, self.selectedPrecioVenta)
             if (item.cantidad == 1):
                 # item.remove()
                 self.session.delete(item)
@@ -257,9 +265,7 @@ class MdiChildVender(QWidget):
                 descuento = 0
             )
             totalItem = newItem.precio_venta
-            # newItem.product = producto
             self.venta.items.append(newItem)
-            # self.session.commit()
         self.setTotalBultos(self.totalBultos + 1)
         self.setTotalVenta(self.venta.total_venta + Decimal("%0.2f" % (totalItem,)), self.venta.total_dto + Decimal("%0.2f" % (totalDto,)))
         play_pop()
@@ -284,7 +290,16 @@ class MdiChildVender(QWidget):
 
     def anularVenta(self):
         if self.model is not None:
-            self.session.rollback()
+            print('model not None')
+            if (self.session.dirty):
+                print('venta dirty')
+                self.session.rollback()
+            else:
+                if (self.venta is not None):
+                    print('venta not none')
+                    print('Elimino Venta')
+                    self.session.delete(self.venta)
+                    self.session.commit()
             self.session.close()
             self.nuevaVenta()
 
@@ -308,4 +323,9 @@ class MdiChildVender(QWidget):
               ('Cantidad', VentaItem.cantidad, 'cantidad', {'editable': False}),
             ])
         self.tb_venta.setModel(self.model.refresh())
-        self.tb_venta.setColumnHidden(0, True);
+        self.tb_venta.setColumnHidden(0, True)
+        header = self.tb_venta.horizontalHeader()
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeToContents)
+        header.setStyleSheet("QHeaderView { font-size: 18pt; font-weight: bold }")

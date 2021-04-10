@@ -37,7 +37,7 @@ class Venta(Base):
     total_dto = Column(SqliteDecimal(2))
     created_at = Column(DateTime(timezone=True), server_default=sql.func.now())
     cierre_id = Column(Integer, ForeignKey('cierre.id'), nullable=True)
-    items = relationship("VentaItem", lazy='dynamic')
+    items = relationship("VentaItem", lazy='dynamic', cascade="all, delete-orphan")
 
 class Product(Base):
     __tablename__ = "product"

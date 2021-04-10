@@ -4,6 +4,7 @@ import logging
 from PyQt5.QtCore import (QFile, QFileInfo, QPoint, QSettings, QSignalMapper, QSize, QTextStream, Qt, pyqtSlot, QModelIndex)
 from PyQt5.QtWidgets import (QAction, QApplication, QFileDialog, QMainWindow, QMdiArea, QMessageBox, QTextEdit, QWidget, QTableView)
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt5.QtGui import QFont
 from db.DBManager import DBManager
 from db.models.objects import Venta, VentaItem
 from db.models.alchemicaltablemodel import AlchemicalTableModel
@@ -26,16 +27,12 @@ class VentaIndexView(QWidget):
         self.isUntitled = True
         self.connectEvents()
         self.dbm = DBManager()
-        self.ventasQuery = self.dbm.session.query(Venta)
-        self.totalesQuery = self.dbm.session.query(
-                                func.count(Venta.id).label('ventas'),
-                                func.sum(Venta.total_venta).label('total'),
-                            )
-        #dt.datetime.utcnow().date()
-
         self.dt_desde.setDate(dt.date.today())
         self.dt_hasta.setDate(dt.date.today())
         self.selectedVenta = None
+        fnt = QFont("Arial", 18)
+        self.tv_detail.setFont(fnt)
+        self.tv_ventas.setFont(fnt)
         self.cargarVentas()
 
     def cargarVentas(self):
@@ -45,11 +42,18 @@ class VentaIndexView(QWidget):
         f_desde = timezone.localize(f_desde).astimezone(pytz.utc)
         f_hasta = timezone.localize(f_hasta).astimezone(pytz.utc)
         if (f_desde <= f_hasta):
-            tempQuery = self.ventasQuery.filter(Venta.created_at >= f_desde).filter(Venta.created_at <= f_hasta)
-            countQuery = self.totalesQuery.filter(Venta.created_at >= f_desde).filter(Venta.created_at <= f_hasta).one()
+            session = self.dbm.getNewSession()
+            ventasQuery = session.query(Venta)
+            totalesQuery = session.query(
+                                    func.count(Venta.id).label('ventas'),
+                                    func.sum(Venta.total_venta).label('total'),
+                                )
+            tempQuery = ventasQuery.filter(Venta.created_at >= f_desde).filter(Venta.created_at <= f_hasta)
+            countQuery = totalesQuery.filter(Venta.created_at >= f_desde).filter(Venta.created_at <= f_hasta).one()
             self.lblCount.setText('<html><head/><body><p><span style="font-size:24pt;">' + str(countQuery[0] or 0) + '</span></p></body></html>')
             self.lblTotal.setText('<html><head/><body><p><span style="font-size:24pt;">$ ' + str(countQuery[1] or 0) + '</span></p></body></html>')
-            self.refreshTable(tempQuery)
+            self.refreshTable(tempQuery, session)
+            session.close()
         else:
             QMessageBox.warning(self, "Consulta de Ventas", "La fecha <Desde> debe ser menor o igual que <Hasta>")
 
@@ -78,9 +82,10 @@ class VentaIndexView(QWidget):
     @pyqtSlot(QModelIndex)
     def tableVentasClicked(self, index):
         venta_id = int(index.model().index(index.row(), 0).data())
-        self.selectedVenta = self.dbm.session.query(Venta).filter(Venta.id == venta_id).one()
+        session = self.dbm.getNewSession()
+        self.selectedVenta = session.query(Venta).filter(Venta.id == venta_id).one()
         model = AlchemicalTableModel(
-            self.dbm.session, #FIXME pass in sqlalchemy session object
+            session, #FIXME pass in sqlalchemy session object
             self.selectedVenta.items, #sql alchemy mapped object
             None, # Data
             None, # Orderby
@@ -95,11 +100,20 @@ class VentaIndexView(QWidget):
         self.tv_detail.setModel(model.refresh())
         header = self.tv_detail.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
-        self.pb_ticket.setVisible(True)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeToContents)
+        header.setStyleSheet("QHeaderView { font-size: 18pt; font-weight: bold }")
 
-    def refreshTable(self, query):
+
+
+        self.pb_ticket.setVisible(True)
+        session.close()
+
+    def refreshTable(self, query, session):
         self.model = AlchemicalTableModel(
-            self.dbm.session, #FIXME pass in sqlalchemy session object
+            session, #FIXME pass in sqlalchemy session object
             query, #sql alchemy mapped object
             None,
             [Qt.DescendingOrder,0], # orderby
@@ -117,3 +131,4 @@ class VentaIndexView(QWidget):
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
         header.setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeToContents)
         header.setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeToContents)
+        header.setStyleSheet("QHeaderView { font-size: 18pt; font-weight: bold }")

@@ -14,7 +14,7 @@ from utils import get_project_root
 ROOT_PATH = str(get_project_root())
 
 class ProductoEditView(QDialog):
-    def __init__(self, codbar):
+    def __init__(self, codbar, extsession):
         super(QDialog, self).__init__()
         self.ui = uic.loadUi(ROOT_PATH + "/layouts/product/edit.ui", self)
         self.setAttribute(Qt.WA_DeleteOnClose)
@@ -24,9 +24,12 @@ class ProductoEditView(QDialog):
         # self.setMinimumSize(400, 200)
         self.connectEvents()
         self.dbm = DBManager()
+        self.sesionExterna = (extsession is not None)
+        self.session = ( self.dbm.getNewSession() if (self.sesionExterna == False) else extsession)
 
     def __del__(self):
-        print ("Object destroyed");
+        if (self.sesionExterna == False) :
+            self.session.close()
 
     def connectEvents(self):
         self.pb_cancelar.clicked.connect(lambda:self.close())
@@ -74,6 +77,8 @@ class ProductoEditView(QDialog):
             iva=self.txt_iva.text(),
             enabled=True
         )
-        self.dbm.session.add(prod)
-        self.dbm.session.commit()
+        self.session.add(prod)
+        self.session.commit()
+        if (self.sesionExterna == False) :
+            self.session.close()
         self.close()

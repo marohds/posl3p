@@ -19,9 +19,10 @@ class DBManager(QObject):
     def __init__(self):
         self.engine = engine
         super(QObject, self).__init__()
-        Session = sessionmaker()
-        Session.configure(bind=self.engine)
-        self.session = Session()
+        # Session = sessionmaker()
+        # Session.configure(bind=self.engine)
+        # self.session = Session()
+        # self.session = self.getNewSession()
 
     def getNewSession(self):
         Session = sessionmaker()
@@ -34,18 +35,19 @@ class DBManager(QObject):
             print("Tabla products no existe")
             logging.error("Tabla products no existe")
             return None
+        session = self.getNewSession()
         product = Product(codbarra="1",nombre="Varios",precio_venta="0",iva="21",enabled=True)
-        self.session.add(product)
+        session.add(product)
         product = Product(codbarra="2",nombre="Carnicería",precio_venta="0",iva="21",enabled=True)
-        self.session.add(product)
+        session.add(product)
         product = Product(codbarra="3",nombre="Fiambre",precio_venta="0",iva="21",enabled=True)
-        self.session.add(product)
+        session.add(product)
         with open(ROOT_PATH + '/db/data/products.csv') as csvDataFile:
             csvReader = csv.reader(csvDataFile)
             for row in csvReader:
                 print(row)
                 product = (
-                    self.session.query(Product)
+                    session.query(Product)
                     .filter(Product.codbarra == row[0])
                     .one_or_none()
                 )
@@ -57,12 +59,13 @@ class DBManager(QObject):
                         iva=row[3],
                         enabled=True
                     )
-                    self.session.add(product)
-            self.session.commit()
-            self.session.close()
+                    session.add(product)
+            session.commit()
+            session.close()
 
     def __exit__(self):
-        self.session.close()
+        # self.session.close()
+        pass
 
     def create_database(self):
         logging.info("starting creating database")

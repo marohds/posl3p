@@ -9,7 +9,14 @@ def play_beep():
     pass
 
 def play_error():
-    threading.Thread(target=playsound, args=('sounds/sms.mp3',), daemon=True).start()
+    try:
+        threading.Thread(target=playsound, args=('sounds/sms.mp3',), daemon=True).start()
+    except:
+        pass
 
 def play_pop():
-    threading.Thread(target=playsound, args=('sounds/pop.mp3',), daemon=True).start()
+    try:
+        threading.Thread(target=playsound, args=('sounds/pop.mp3',), daemon=True).start()
+    except:
+        pass
+

@@ -11,7 +11,8 @@ from db.models.qvariantalchemy import String, Integer, Boolean, DateTime
 from datetime import datetime
 import pytz
 from dateutil.parser import parse
-
+import numbers
+import decimal
 from pprint import pprint
 
 
@@ -128,7 +129,7 @@ class AlchemicalTableModel(QAbstractTableModel):
         if not index.isValid():
                 return QVariant()
 
-        elif role not in (Qt.DisplayRole, Qt.EditRole):
+        elif role not in (Qt.DisplayRole, Qt.EditRole, Qt.TextAlignmentRole):
                 return QVariant()
 
         row = self.results[index.row()]
@@ -136,12 +137,19 @@ class AlchemicalTableModel(QAbstractTableModel):
 
         value = rgetattr(row, name)
 
+        col_align = Qt.AlignLeft
+
         if isinstance(value, datetime):
             timezone = pytz.timezone("America/Argentina/Buenos_Aires")
             value = pytz.utc.localize(value).astimezone(pytz.timezone("America/Argentina/Buenos_Aires"))
             value = str(value.strftime("%d/%m/%Y %H:%M:%S"))
         else:
+            if isinstance(value, numbers.Number):
+                col_align = Qt.AlignRight
             value = str(value)
+
+        if (role == Qt.TextAlignmentRole) :
+            return col_align
         return value
         # return str(getattr(row, name))
 

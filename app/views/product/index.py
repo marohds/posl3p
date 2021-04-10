@@ -2,6 +2,7 @@ import logging
 from PyQt5.QtCore import (QFile, QFileInfo, QPoint, QSettings, QSignalMapper, QSize, QTextStream, Qt, pyqtSlot, QModelIndex)
 from PyQt5.QtWidgets import (QAction, QApplication, QFileDialog, QMainWindow, QMdiArea, QMessageBox, QTextEdit, QWidget, QTableView)
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt5.QtGui import QFont
 from db.DBManager import DBManager
 from db.models.objects import Product
 from db.models.alchemicaltablemodel import AlchemicalTableModel
@@ -27,6 +28,9 @@ class ProductoIndexView(QWidget):
         self.btnCancelarCambios.hide()
         self.btnGuardarCambios.hide()
         self.btn_editMode.hide()
+        self.session = self.dbm.getNewSession()
+        fnt = QFont("Arial", 18)
+        self.tv_productos.setFont(fnt)
 
     def keyPressEvent(self, event):
         key = event.key()
@@ -36,8 +40,12 @@ class ProductoIndexView(QWidget):
             self.parent.indexProd.trigger()
 
     def __del__(self):
-        if self.dbm.session.dirty :
-            self.dbm.session.rollback()
+        try:
+            if self.session.dirty:
+                self.session.rollback()
+            self.session.close()
+        except:
+            pass
 
     def connectEvents(self):
         self.pb_buscar.clicked.connect(self.searchProduct)
@@ -49,7 +57,7 @@ class ProductoIndexView(QWidget):
         self.btnGuardarCambios.clicked.connect(self.guardarCambios)
 
     def openNewProduct(self):
-        if self.dbm.session.dirty :
+        if self.session.dirty:
             QMessageBox.information(None, "Cambios pendientes", "Tiene cambios pendientes sin guardar")
             return None
         self.setEditMode(False)
@@ -80,31 +88,31 @@ class ProductoIndexView(QWidget):
         self.refreshTable()
 
     def guardarCambios(self):
-        self.dbm.session.commit()
+        self.session.commit()
         self.setEditMode(False)
 
     def cancelarCambios(self):
-        self.dbm.session.rollback()
+        self.session.rollback()
         self.setEditMode(False)
 
     def searchProduct(self):
         txtBuscar = self.txt_buscar.text()
-        self.productsQuery = self.dbm.session.query(Product).filter_by(codbarra=txtBuscar)
+        self.productsQuery = self.session.query(Product).filter_by(codbarra=txtBuscar)
         self.refreshTable()
 
     def searchProducts(self):
         txtBuscar = self.txt_buscar.text()
-        self.productsQuery = self.dbm.session.query(Product).filter(Product.nombre.like('%' + txtBuscar + '%'))
+        self.productsQuery = self.session.query(Product).filter(Product.nombre.like('%' + txtBuscar + '%'))
         self.refreshTable()
 
     def refreshTable(self):
         self.model = AlchemicalTableModel(
-            self.dbm.session, #FIXME pass in sqlalchemy session object
+            self.session, #FIXME pass in sqlalchemy session object
             self.productsQuery, #sql alchemy mapped object
             None,
             [Qt.AscendingOrder,2], # orderby
             [
-              ('Product', Product.id, 'id', {'editable': False}),
+              ('Producto', Product.id, 'id', {'editable': False}),
               ('Cod. Barra', Product.codbarra, 'codbarra', {'editable': self.editMode}),
               ('Nombre', Product.nombre, 'nombre', {'editable': self.editMode}),
               ('Precio Venta', Product.precio_venta, 'precio_venta', {'editable': self.editMode}),
@@ -119,3 +127,4 @@ class ProductoIndexView(QWidget):
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
         header.setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeToContents)
         header.setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeToContents)
+        header.setStyleSheet("QHeaderView { font-size: 18pt; font-weight: bold }")

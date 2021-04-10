@@ -22,7 +22,6 @@
         "views/cierre/index.py",
         "views/product/edit.py",
         "views/product/index.py",
-        "views/product/new.py",
         "views/venta/index.py",
         "views/venta/vender.py",
         "views/DbManagerView.py",

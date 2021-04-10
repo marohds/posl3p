@@ -74,7 +74,7 @@
           <x>0</x>
           <y>0</y>
           <width>780</width>
-          <height>475</height>
+          <height>490</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -1018,11 +1018,14 @@
            <item>
             <widget class="QToolButton" name="btn_editMode">
              <property name="text">
-              <string>Modo Edición</string>
+              <string>Activar Edición</string>
              </property>
              <property name="icon">
               <iconset resource="../../mdi.qrc">
                <normaloff>:/images/copy.png</normaloff>:/images/copy.png</iconset>
+             </property>
+             <property name="toolButtonStyle">
+              <enum>Qt::ToolButtonTextBesideIcon</enum>
              </property>
             </widget>
            </item>
