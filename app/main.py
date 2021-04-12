@@ -182,6 +182,8 @@ class MainWindow(QMainWindow):
         self.fileToolBar.addAction(self.indexVta)
         self.fileToolBar = self.addToolBar("Cierres")
         self.fileToolBar.addAction(self.indexZ)
+        self.fileToolBar = self.addToolBar("BD Manager")
+        self.fileToolBar.addAction(self.dbManager)
 
     def createStatusBar(self):
         self.statusBar().showMessage("Ready")

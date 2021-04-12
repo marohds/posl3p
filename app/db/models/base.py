@@ -15,5 +15,5 @@ ROOT_PATH = str(get_project_root())
 # See tutorial from https://leportella.com/english/2019/01/10/sqlalchemy-basics-tutorial.html #
 ###############################################################################################
 Base = declarative_base()
-engine = create_engine('sqlite:///' + ROOT_PATH + '/db/objects2.db', echo=True)
+engine = create_engine('sqlite:///' + ROOT_PATH + '/db/objects_prd.db', echo=True)
 Session = sessionmaker(bind=engine)
