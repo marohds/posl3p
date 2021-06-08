@@ -218,7 +218,7 @@ if __name__ == "__main__":
     __file_date_format = '%Y-%m-%d %H-%M-%S'
 
     root = logging.getLogger()
-    root.setLevel(logging.INFO)
+    root.setLevel(logging.ERROR)
 
     console_formatter = logging.Formatter(__log_format, __console_date_format)
 
