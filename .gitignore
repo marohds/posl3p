@@ -3,3 +3,5 @@ build/
 dist/
 *log_file.txt
 app/db/objects2.db-journal
+app/db/objects_prd.db
+app/db/objects_prd.db-journal
